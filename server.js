@@ -193,3 +193,20 @@ app.get('/api/health', (req, res) => res.json({ ok: true }));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server listening on ${PORT}`));
+
+// server.js (add this)
+app.get('/api/tickets/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    if (!id) return res.status(400).json({ error: 'Missing ticket id' });
+
+    const snapshot = await db.ref(`tickets/${id}`).once('value');
+    const ticket = snapshot.val();
+    if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
+
+    return res.json(ticket);
+  } catch (err) {
+    console.error('GET /api/tickets/:id error', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
